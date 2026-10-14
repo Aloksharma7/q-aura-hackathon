@@ -74,6 +74,21 @@ WEAK = {
     "Many hyphens in hostname",
 }
 
+# Plain-language explanation shown to the user for each indicator
+EXPLANATIONS = {
+    TRUSTED: "This is a well-known website that we recognise.",
+    "IP-address hostname": "The link uses a raw IP address instead of a website name. Real companies almost never do this.",
+    "Many subdomain levels": "The address has many parts before the main domain, a trick used to hide the real site.",
+    "Possible brand-name lookalike": "The address imitates a famous brand (for example paypa1 instead of paypal) but is not that brand's real domain.",
+    "Contains @ in URL authority": "Everything before the @ is ignored by browsers, so the link can appear to belong to one site while opening another.",
+    "Punycode (disguised characters) in hostname": "The address uses special characters that look like normal letters to imitate another site.",
+    "Unusually long URL": "Very long links are often used to hide where they really lead.",
+    "Not using HTTPS": "The connection is not encrypted, so anything you type could be intercepted.",
+    "Contains sensitive-action keywords": "The link contains words like login, verify or password, which scammers use to pressure you.",
+    "Suspicious top-level domain": "The domain ending is cheap and heavily used for scams.",
+    "Many hyphens in hostname": "Long hyphenated names like secure-update-account are a common phishing pattern.",
+}
+
 # Common two-part public suffixes (extend as needed, or use tldextract)
 TWO_PART_SUFFIXES = {"co.uk", "com.au", "co.in", "co.jp", "com.br", "org.uk"}
 
@@ -180,19 +195,55 @@ def classify(score, indicators):
     return 1, "Safe", adjusted
 
 
+def is_valid_host(host):
+    """A real website name has a dot (example.com); IPs are also accepted."""
+    try:
+        ipaddress.ip_address(host)
+        return True
+    except ValueError:
+        return "." in host and not host.startswith(".")
+
+
+def extract_features(url, parsed, host):
+    return {
+        "length": len(url),
+        "dots": host.count("."),
+        "hyphens": host.count("-"),
+        "digits": sum(c.isdigit() for c in host),
+        "special_chars": sum(not c.isalnum() and c not in "./:-" for c in url),
+        "https": parsed.scheme == "https",
+        "domain": registered_domain(host),
+        "host": host,
+    }
+
+
+def make_flags(indicators):
+    """Turn indicator names into {title, severity, detail} for the UI."""
+    flags = []
+    for name in indicators:
+        if name in STRONG:
+            severity = "high"
+        elif name in WEAK:
+            severity = "medium"
+        elif name == TRUSTED:
+            severity = "good"
+        else:
+            continue
+        flags.append({"title": name, "severity": severity, "detail": EXPLANATIONS.get(name, "")})
+    return flags
+
+
 def predict_url(url):
     url = url.strip() if isinstance(url, str) else ""
-    parsed, indicators = analyze_url(url) if url else (None, ["Empty URL"])
+    if not url:
+        return {"error": "Please enter a URL."}
+    if re.search(r"\s", url):
+        return {"error": "A URL cannot contain spaces."}
 
-    if parsed is None:
-        return {
-            "url": url,
-            "prediction": 2,
-            "label": "Suspicious",
-            "phishing_score": None,
-            "adjusted_score": None,
-            "indicators": indicators,
-        }
+    parsed, indicators = analyze_url(url)
+    host = (parsed.hostname or "").lower().rstrip(".") if parsed else ""
+    if parsed is None or not is_valid_host(host):
+        return {"error": "This does not look like a valid web address (example: https://example.com)."}
 
     score = get_phishing_score(url)
     prediction, label, adjusted = classify(score, indicators)
@@ -205,6 +256,8 @@ def predict_url(url):
         "phishing_score": round(score, 4),
         "adjusted_score": round(adjusted, 4),
         "indicators": indicators,
+        "flags": make_flags(indicators),
+        "features": extract_features(url, parsed, host),
     }
 
 
@@ -214,7 +267,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     try:
-        print(json.dumps(predict_url(sys.argv[1])))
+        print(json.dumps(predict_url(sys.argv[1])))  # may hold "error" for bad input
     except Exception as error:
         print(json.dumps({"error": str(error)}))
         sys.exit(1)
