@@ -1,0 +1,60 @@
+HACKATHON CHALLENGE
+
+AI-Based Malicious URL Detection System
+
+Problem Statement
+
+How can you develop an intelligent system using Artificial Intelligence and Machine Learning to identify whether a given URL is legitimate or malicious, helping users protect themselves from phishing attacks, fraudulent websites, and online scams?
+
+Your Challenge
+
+Design and develop an intelligent system that analyzes a website URL and predicts whether it is Safe, Suspicious, or Malicious.
+
+Expected Features
+
+1. Accept a URL as input from the user.
+2. Extract URL features such as length, special characters, domain structure, and suspicious keywords.
+3. Use a machine learning model to classify the URL.
+4. Display the prediction along with an explanation of detected risk indicators.
+5. Develop a user-friendly interface for demonstrating the system.
+
+Evaluation Schedule
+
+Round 1 – PPT Presentation and Proposed Approach
+
+Time: 11:30 AM
+
+Teams must present a PowerPoint explaining:
+
+- Problem statement and the problem being addressed.
+- Proposed solution and system architecture.
+- AI/ML approach and algorithms to be used.
+- Dataset and URL features for detection.
+- Technology stack and implementation plan.
+- Expected outcomes, innovation, and practical applications.
+
+Round 2 – Final Evaluation and Complete Demo
+
+Time: 2:30 PM
+
+Teams must demonstrate their completed working prototype, including:
+
+- Live URL input and classification.
+- Detection of Safe, Suspicious, and Malicious URLs.
+- Explanation of suspicious URL characteristics.
+- Machine learning model performance and test results.
+- End-to-end functionality, innovation, and practical applicability.
+
+Expected Deliverables
+
+- Round 1: PPT presentation explaining the proposed solution and implementation approach.
+- Round 2: Fully functional prototype with frontend, integrated ML model, test results, and live demonstration.
+
+Important Instructions
+
+- Teams must be ready for evaluation at the scheduled times.
+- The PPT should clearly explain the proposed approach and implementation plan.
+- The final demonstration must showcase a working end-to-end solution.
+- Teams should be prepared to explain their technical decisions and answer questions from the judges.
+
+Objective: Develop an AI-powered cybersecurity solution that helps users identify potentially malicious URLs and make safer decisions online.
